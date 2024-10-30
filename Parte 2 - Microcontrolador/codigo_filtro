@@ -1,0 +1,202 @@
+###secciones del codigo####
+#Cargamos las direcciones de los segmentos de memoria RAM
+#UART data1:
+addi t0, zero, 0x2  # Cargar 0x2 en t0 (parte alta)
+slli t0, t0, 12     # Desplazar t0 a la izquierda 12 bits, resultando en 0x2000
+addi t0, t0, 0x18   # Ajustar la parte baja, sumando 0x18, resultando en 0x2018
+#UART data2:
+addi t1, zero, 0x2  # Cargar 0x2 en t2 (parte alta)
+slli t1, t1, 12     # Desplazar t2 a la izquierda 12 bits, resultando en 0x2000
+addi t1, t1, 0x1C   # Ajustar la parte baja, sumando 0x1C, resultando en 0x201C
+#UART ctrl:
+addi t2, zero, 0x2  # Cargar 0x2 en t1 (parte alta)
+slli t2, t2, 12     # Desplazar t1 a la izquierda 12 bits, resultando en 0x2000
+addi t2, t2, 0x10   # Ajustar la parte baja, sumando 0x10, resultando en 0x2010
+#ROM
+
+#LEDS:
+addi s0, zero, 0x2  # Cargar 0x2 en t0 (parte alta)
+slli s0, s0, 12     # Desplazar t0 a la izquierda 12 bits, resultando en 0x2000
+addi s0, s0, 0x04   # Ajustar la parte baja, sumando 0x04, resultando en 0x2004
+
+#7SEGMENTOS:
+addi s1, zero, 0x2  # Cargar 0x2 en t0 (parte alta)
+slli s1, s1, 12     # Desplazar t0 a la izquierda 12 bits, resultando en 0x2000
+addi s1, s1, 0x08   # Ajustar la parte baja, sumando 0x18, resultando en 0x2008
+#ACCL. ctrl:
+addi s0, zero, 0x2  # Cargar 0x2 en t0 (parte alta)
+slli s0, s0, 12     # Desplazar t0 a la izquierda 12 bits, resultando en 0x2000
+addi s0, s0, 0x30   # Ajustar la parte baja, sumando 0x18, resultando en 0x2030
+#ACCL. data:
+addi a0, zero, 0x2  # Cargar 0x2 en t0 (parte alta)
+slli a0, a0, 12     # Desplazar t0 a la izquierda 12 bits, resultando en 0x2000
+addi a0, a0, 0x34   # Ajustar la parte baja, sumando 0x18, resultando en 0x2034
+#Switches
+addi a1, zero, 0x2  # Cargar 0x2 en t0 (parte alta)
+slli a1, a1, 12     # Desplazar t0 a la izquierda 12 bits, resultando en 0x2000
+addi a1, a1, 0x00   # Ajustar la parte baja, sumando 0x18, resultando en 0x2000
+#RAM
+#(truncado de la ram)
+				#modo reposo: 
+				#a2 ser  el regitro para vlaores temporales
+addi a2,x0,0x0001 #cargamos el led con significado modo reposo				
+sw a2, 0(s0)   #enviar a los leds el que indica que estamos en reposo (store)
+
+
+addi a2, x0, 0x0002 #control esperado con new_rx en 1
+LOOP_START:
+lw a3, 0(t2) # carga el registro control uart
+bne a2,a3,LOOP_START # compara con el new rx
+				#recepci n#
+#en caso de recibir el 'star bit':
+					#ciclo de carga:
+CARGA:
+#enviamos a los lEDS el led que indica que estamos recibiendo 
+addi a2,x0,0x0002 #cargamos el led con significado modo de carga				
+sw a2, 0(s0)   #enviar a los leds el que indica que estamos en carga(store)
+#hace un ciclo de 9 iteraciones  guardando los 9 pixeles
+addi a2, x0,0x0002 #control esperado con new_rx en 1
+addi s6, x0, 0x0000 #control limpio
+Pixel_1:
+lw a3, 0(t2) #carga el registro de control
+bne a3,a2, Pixel_1 #(a3 registro temporal) (EVAL A SI HAY UN BUEVO DATO)
+sw s6, 0(t2) #limpiamos el registro de control #(revisar si esto no da problemas)
+lw a4, 0(t1) #carga el pixel 1
+Pixel_2:
+lw a3, 0(t2) #carga el registro de control
+bne a3,a2, Pixel_2 #(a3 registro temporal) (EVAL A SI HAY UN BUEVO DATO)
+sw s6, 0(t2) #limpiamos el registro de control #(revisar si esto no da problemas)
+lw a5, 0(t1) #carga el pixel 2
+Pixel_3:
+lw a3, 0(t2) #carga el registro de control
+bne a3,a2, Pixel_3 #(a3 registro temporal) (EVAL A SI HAY UN BUEVO DATO)
+sw s6, 0(t2) #limpiamos el registro de control #(revisar si esto no da problemas)
+lw a6, 0(t1) #carga el pixel 3
+Pixel_4:
+lw a3, 0(t2) #carga el registro de control
+bne a3,a2, Pixel_4 #(a3 registro temporal)  (EVAL A SI HAY UN BUEVO DATO)
+sw s6, 0(t2) #limpiamos el registro de control #(revisar si esto no da problemas)
+lw a7, 0(t1) #carga el pixel 4
+Pixel_5:
+lw a3, 0(t2) #carga el registro de control
+bne a3,a2, Pixel_5 #(a3 registro temporal)  (EVAL A SI HAY UN BUEVO DATO)
+sw s6, 0(t2) #limpiamos el registro de control #(revisar si esto no da problemas)
+lw s2, 0(t1) #carga el pixel 5
+Pixel_6:
+lw a3, 0(t2) #carga el registro de control
+bne a3,a2, Pixel_3 #(a3 registro temporal) (EVAL A SI HAY UN BUEVO DATO)
+sw s6, 0(t2) #limpiamos el registro de control #(revisar si esto no da problemas)
+lw s3, 0(t1) #carga el pixel 5
+Pixel_7:
+lw a3, 0(t2) #carga el registro de control
+bne a3,a2, Pixel_3 #(a3 registro temporal) (EVAL A SI HAY UN BUEVO DATO)
+sw s6, 0(t2) #limpiamos el registro de control #(revisar si esto no da problemas)
+lw s4, 0(t1) #carga el pixel 7
+Pixel_8:
+lw a3, 0(t2) #carga el registro de control
+bne a3,a2, Pixel_3 #(a3 registro temporal) (EVAL A SI HAY UN BUEVO DATO)
+sw s6, 0(t2) #limpiamos el registro de control #(revisar si esto no da problemas)
+lw s5, 0(t1) #carga el pixel 8
+Pixel_9:
+lw a3, 0(t2) #carga el registro de control
+bne a3,a2, Pixel_3 #(a3 registro temporal) (EVAL A SI HAY UN BUEVO DATO)
+sw s6, 0(t2) #limpiamos el registro de control #(revisar si esto no da problemas)
+lw s6, 0(t1) #carga el pixel 9
+#a4,a5,a6,a7,s2,s3,s4,s5,s6 contienen los pixeles
+#*(revisar compatibilidad con python: revisar si se espera que este sea leido)******
+
+				# hardware o software?
+#####verificar m todo de calculo#####
+#recordar a2 ten a el significado de new_rx
+#a3 la carga del registro de control
+#s6 ten a el 0x0000
+addi s7,x0, 0x0001 #definir los valores de los switches
+lw s8 0(a1) #cargaos el contenido de los switches
+beq s8,s7, software #si es el esperado para calcular por software, vamos ah 
+jal zero, hardware #sino, ser  por hardware
+
+
+
+					#M todo por hardware:
+hardware:
+addi a2,x0,0x0004 #cargamos el led con significado modo de calculo				
+sw a2, 0(s0)   #enviar a los leds el que indica que estamos en calculo(store)
+
+addi s8, x0, 0x1 # Produce el valor de inicio de recepcion 
+sw s8, 0(s0) # Carga en el registro de control acce
+
+# SE CARGAN los 9 pixeles
+#Enviamos los 9 pixeles ( que se encuentran en los registros unoa uno)
+lw a4, 0(a0)
+lw a5, 0(a0)
+lw a6, 0(a0)
+lw a7, 0(a0)
+lw s2, 0(a0)
+lw s3, 0(a0)
+lw s4, 0(a0)
+lw s5, 0(a0)
+lw s6, 0(a0)
+# 7 segmentos inicia cuenta
+addi s7, x0, 0x1
+lw s7, 0(s1)
+
+#  Para finalizar envío de un pixel
+addi s7, x0, 0xE  # Valor que debe tener el registro de control del accelerador
+Espera_fin_hardware:
+lw s8, 0(s0)     #Carga el valor del registro de control del acce en un registro
+bne s7, s8, Espera_fin_hardware # Compara para esperar que se cumpla la finalización de filtro de un solo pixel
+# 7 segmentos finaliza cuenta
+addi s7, x0, 0x2
+lw s7, 0(s1)
+
+# Carga el valor del pixel en uart
+lw s7, 0(a0)
+sw s7, 0(t0)
+
+# Envia el send para que se inicie el envio del uart
+addi s8, x0, 0x1
+sw s8, 0(t2)
+
+# Vuelve a cargar  un nuevo pixel
+jal zero, CARGA 
+ 
+
+
+#Enviamos los 9 pixeles ( que se encuentran en los registros unoa uno), luego monitorizamos el registro de control (para saber cuando se hizo el calculo) (con loads)
+#Cuando se cumpla: capturamos el dato calculo (Store)
+##detener el contador y mostrar en el 7segmentos (logica interna del modulo)
+#enviamos el dato calculado hacia el uart
+#cargamos el send en el uart
+#regresamos a la funci n de recibiendo datos (jalr)
+jal zero, CARGA
+					#M todo por software
+software:
+addi a2,x0,0x0004 #cargamos el led con significado modo de calculo				
+sw a2, 0(s0)   #enviar a los leds el que indica que estamos en calculo(store)
+addi s9, x0, 0x1 # 7 segmentos inicia cuenta
+lw s9, 0(s1)
+#hacer la secuencia de calculos necesarios para obtener el pixel procesado:
+#((pixel_00 + pixel_02 + pixel_20 + pixel_22) + ((pixel_01 + pixel_10 + pixel_12 + pixel_21) << 1) + (pixel_11 << 2)) >> 4;
+#a4,a5,a6,a7,s2,s3,s4,s5,s6 contienen los pixeles
+#puedo usar desde s7:
+add s7, a4,a6 #pixel_00+pixel_02
+add s7, s7,s4  #+pixel_20
+add s7,s7,s6  #+pixel_22
+add s8,a5,a7 #pixel_01+pixel_10
+add s8, s8,s3 #+pixel 12
+add s8, s8,s5 #pixel_ 21
+slli s8, s8,1 #corrimiento
+add s9, s2,zero
+slli s9,s9,2 #sumamos los 3 elementos
+add s7,s7,s8
+add s7,s7,s9
+slli s7,s7,4 #hacemos la división
+sw s7,0(t0) #se envía al uart
+# 7 segmentos finaliza cuenta
+addi s7, x0, 0x2
+lw s7, 0(s1)
+# Envia el send para que se inicie el envio del uart
+addi s8, x0, 0x1
+sw s8, 0(t2)
+#regresamos la funcion de recibiendo datos
+jal zero, CARGA

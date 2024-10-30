@@ -1,0 +1,48 @@
+#cargado de direccion con addi:
+#contemplar valor máximo del inmediato 
+# cargamos la dirección del UART dato 1 en memoria:
+addi t0, zero, 0x2  # Cargar 0x2 en t0 (parte alta)
+slli t0, t0, 12     # Desplazar t0 a la izquierda 12 bits, resultando en 0x2000
+addi t0, t0, 0x18   # Ajustar la parte baja, sumando 0x18, resultando en 0x2018
+
+# cargamos la dirección del UART ctr en memoria:
+addi t1, zero, 0x2  # Cargar 0x2 en t1 (parte alta)
+slli t1, t1, 12     # Desplazar t1 a la izquierda 12 bits, resultando en 0x2000
+addi t1, t1, 0x10   # Ajustar la parte baja, sumando 0x10, resultando en 0x2010
+# cargamos la dirección del UART Dato 2 en memoria
+addi t2, zero, 0x2  # Cargar 0x2 en t2 (parte alta)
+slli t2, t2, 12     # Desplazar t2 a la izquierda 12 bits, resultando en 0x2000
+addi t2, t2, 0x1C   # Ajustar la parte baja, sumando 0x1C, resultando en 0x201C
+#cargamos las demas direcciones de los perfericos:
+addi a1, zero, 0x0001 # cargamos el valor a cargar en registro de control para enviar
+
+#comenzamos el envio de HELLO WORLD:
+addi a0, zero, 0x48 # cargamos la letra H en ascci
+jal ra, UART_SEND # en ra se guarda PC+4 y saltaa  la etiqueta UART_SEND
+addi a0,zero,0x65 #cargamos el valor de e en ascci
+jal ra, UART_SEND
+addi a0,zero,0x6C #cargamos el valor de l en ascci
+jal ra, UART_SEND
+jal ra, UART_SEND #volvemos a enviar l
+addi a0,zero,0x6F #cargamos el valor de o en ascci
+jal ra, UART_SEND
+addi a0,zero,0x20 #cargamos el valor de space en ascci
+jal ra, UART_SEND
+addi a0,zero,0x77 #cargamos el valor de w en ascci
+jal ra, UART_SEND
+addi a0,zero,0x6F #cargamos el valor de o en ascci
+jal ra, UART_SEND
+addi a0,zero,0x72 #cargamos el valor de r en ascci
+jal ra, UART_SEND
+addi a0,zero,0x6C #cargamos el valor de l en ascci
+jal ra, UART_SEND
+addi a0,zero,0x64 #cargamos el valor de d en ascci
+jal ra, UART_SEND
+
+UART_SEND:
+sw a0, (t0)  #cargar dato a enviar
+sw a1, (t1) # enviar la señal de enviar
+LOOP:
+lw a2,0(t1) # cargamos lo que tenga el registro de control
+bne a2,zero,LOOP # si no se ha enviado no avanzamos y volvemos a revisar
+jalr zero,ra,0
